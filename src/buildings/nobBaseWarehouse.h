@@ -242,7 +242,7 @@ class nobBaseWarehouse : public nobBaseMilitary, public DataChangedObservable
                 + GetRealFiguresCount(JOB_OFFICER) + GetRealFiguresCount(JOB_GENERAL);
         }
         /// Bestellt Soldaten
-        void OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst=false);
+        unsigned OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst=false, Job = JOB_NOTHING );
 
         /// Schickt einen Verteidiger raus, der einem Angreifer in den Weg rennt
         nofAggressiveDefender* SendDefender(nofAttacker* attacker) override;

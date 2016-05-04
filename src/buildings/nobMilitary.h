@@ -24,6 +24,8 @@
 #include <list>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 class nofPassiveSoldier;
 class nofActiveSoldier;
 class nofAttacker;
@@ -65,6 +67,17 @@ class nobMilitary : public nobBaseMilitary
         bool is_regulating_troops;
         /// This building was captured by its current owner. This flag is set once and never to be changed again
         bool captured_not_built;
+
+		bool mAutoTrain = false;
+		bool mAutoTrainVirtual = false;
+		void RegulateTrainTroops();
+
+	public:
+        bool IsAutoTrain() const { return mAutoTrain; }
+		bool IsAutoTrainVirtual() const { return mAutoTrainVirtual; }
+		void SetAutoTrainAllowed(const bool enabled);
+		void ToggleAutoTrainVirtual(){ mAutoTrainVirtual = !mAutoTrainVirtual; } 
+
     public:
 
         /// Soldatenbesatzung

@@ -282,7 +282,7 @@ class GameClientPlayer : public GamePlayerInfo
         void GetBuildingCount(BuildingCount& bc) const;
         /// Berechnet die durschnittlichen Produktivität eines jeden Gebäudetyps
         /// (erwartet als Argument ein 40-er Array!)
-        void CalcProductivities(std::vector<unsigned short>& productivities);
+        void CalcProductivities(std::vector<unsigned short>& productivities)const;
 
         /// Berechnet die durschnittlichen Produktivität aller Gebäude
         unsigned short CalcAverageProductivitiy();
@@ -328,7 +328,7 @@ class GameClientPlayer : public GamePlayerInfo
         /// Ist ein anderer Spieler ein richtiger Verbündeter von uns, d.h. Teamsicht, Unterstützung durch aggressive Verteidiger usw.?
         bool IsAlly(const unsigned char player) const;
         /// Truppen bestellen
-        void OrderTroops(nobMilitary* goal, unsigned count, bool ignoresettingsendweakfirst=false);
+        void OrderTroops(nobMilitary* goal, unsigned count, bool ignoresettingsendweakfirst=false, Job = JOB_NOTHING );
         /// Prüft die Besatzung von allen Militärgebäuden und reguliert entsprechend (bei Veränderung der Militäreinstellungen)
         void RegulateAllTroops();
         /// Prüft von allen Militärgebäuden die Fahnen neu

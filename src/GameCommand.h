@@ -82,7 +82,8 @@ namespace gc
         UPGRADEROAD,
         SENDSOLDIERSHOME,
         ORDERNEWSOLDIERS,
-        NOTIFYALLIESOFLOCATION
+        NOTIFYALLIESOFLOCATION,
+		SET_AUTOTRAIN_ALLOWED
     };
 
     class GameCommand

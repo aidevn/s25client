@@ -1254,7 +1254,7 @@ void GameClientPlayer::GetBuildingCount(BuildingCount& bc) const
 
 /// Berechnet die durschnittlichen Produktivität eines jeden Gebäudetyps
 /// (erwartet als Argument ein 40-er Array!)
-void GameClientPlayer::CalcProductivities(std::vector<unsigned short>& productivities)
+void GameClientPlayer::CalcProductivities(std::vector<unsigned short>& productivities)const
 {
     RTTR_Assert(productivities.size() == 40);
 
@@ -1264,7 +1264,7 @@ void GameClientPlayer::CalcProductivities(std::vector<unsigned short>& productiv
         // und den Mittelwert bildet
         unsigned total_productivity = 0;
 
-        for(std::list<nobUsual*>::iterator it = buildings[i].begin(); it != buildings[i].end(); ++it)
+        for(std::list<nobUsual*>::const_iterator it = buildings[i].cbegin(); it != buildings[i].cend(); ++it)
             total_productivity += (*it)->GetProductivity();
 
         if(!buildings[i].empty())
@@ -1369,18 +1369,31 @@ bool GameClientPlayer::IsPlayerAttackable(const unsigned char player) const
 }
 
 
-void GameClientPlayer::OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst)
+void GameClientPlayer::OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst, Job OrderExactJob )
 {
     // Solange Lagerhäuser nach Soldaten absuchen, bis entweder keins mehr übrig ist oder alle Soldaten bestellt sind
     nobBaseWarehouse* wh;
     do
     {
-        wh = FindWarehouse(*goal, FW::HasMinSoldiers(1), false, false);
-        if(wh)
+        if( OrderExactJob == JOB_NOTHING )
         {
-            unsigned order_count = std::min(wh->GetSoldiersCount(), count);
-            count -= order_count;
-            wh->OrderTroops(goal, order_count,ignoresettingsendweakfirst);
+            wh = FindWarehouse(*goal, FW::HasMinSoldiers(1), false, false);
+            if(wh)
+            {
+                unsigned order_count = std::min(wh->GetSoldiersCount(), count);
+                count -= order_count;
+                wh->OrderTroops(goal, order_count,ignoresettingsendweakfirst );
+            }
+        }
+        else
+        {
+            wh = FindWarehouse(*goal, FW::HasFigure( OrderExactJob, false ), false, false);
+            if(wh)
+            {
+                count = wh->OrderTroops(goal, count,ignoresettingsendweakfirst, OrderExactJob );
+                if( !count )
+                    break;
+            }
         }
     }
     while(count && wh);

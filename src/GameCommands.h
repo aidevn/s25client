@@ -488,6 +488,23 @@ namespace gc{
             void Execute(GameWorldGame& gwg, GameClientPlayer& player, const unsigned char playerid) override;
     };
 
+	class SetAutoTrainAllowed : public Coords
+    {
+        GC_FRIEND_DECL;
+        const bool enabled;
+        protected:
+            SetAutoTrainAllowed(const MapPoint pt, const bool enabled): Coords(SET_AUTOTRAIN_ALLOWED, pt), enabled(enabled) {}
+            SetAutoTrainAllowed(Serializer& ser): Coords(SET_AUTOTRAIN_ALLOWED, ser), enabled(ser.PopBool()) {}
+        public:
+            void Serialize(Serializer& ser) const override
+            {
+                Coords::Serialize(ser);
+                ser.PushBool(enabled);
+            }
+            /// Führt das GameCommand aus
+            void Execute(GameWorldGame& gwg, GameClientPlayer& player, const unsigned char playerid) override;
+    };
+
 /// Produktivität in einem Gebäude deaktivieren/aktivieren
     class SetProductionEnabled : public Coords
     {

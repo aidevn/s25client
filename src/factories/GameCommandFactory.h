@@ -70,6 +70,8 @@ public:
     bool SeaAttack(const MapPoint pt, const unsigned soldiers_count, const bool strong_soldiers);
     /// Toggles coin delivery on/off for a military building
     bool SetCoinsAllowed(const MapPoint pt, const bool enabled);
+	bool SetAutoTrainAllowed(const MapPoint pt, const bool enabled);
+
     /// Stops/starts production of a producer
     bool SetProductionEnabled(const MapPoint pt, const bool enabled);
     bool NotifyAlliesOfLocation(const MapPoint pt);
