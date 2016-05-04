@@ -24,8 +24,6 @@
 #include <list>
 #include <vector>
 
-#include <boost/optional.hpp>
-
 class nofPassiveSoldier;
 class nofActiveSoldier;
 class nofAttacker;

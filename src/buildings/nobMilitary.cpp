@@ -560,19 +560,31 @@ void nobMilitary::RegulateTrainTroops()
 
 	boost::array< unsigned char, 5 > RankCounts{ { 0, 0, 0, 0, 0 } };
 
-	for( auto& it = troops.begin(); it != troops.end(); ++it )
-		++RankCounts[ (*it)->GetRank() ];
+	for( auto& Soldier : troops )
+        ++RankCounts[ Soldier->GetRank() ];
+    
+    for( auto& Soldier : ordered_troops )
+        ++RankCounts[ Soldier->GetRank() ];
 
-	for( auto& it = ordered_troops.begin(); it != ordered_troops.end(); ++it )
-		++RankCounts[ (*it)->GetRank() ];
+    for( auto& Soldier : troops_on_mission )
+        ++RankCounts[ Soldier->GetRank() ];
 
-	for( auto& it = troops_on_mission.begin(); it != troops_on_mission.end(); ++it )
-		++RankCounts[ (*it)->GetRank() ];
+    for( auto& Soldier : far_away_capturers )
+        ++RankCounts[ Soldier->GetRank() ];
 
     SortedTroops::reverse_iterator it = troops.rbegin();
-	for( char CurrentRank = 4; CurrentRank >= 0; --CurrentRank )
-	{
-		if( CurrentRank >= 4 )
+
+    auto GetSoldierRank = 
+    []( const Job& Job )
+    {
+        return unsigned char(SOLDIER_JOBS[ Job ] - JOB_PRIVATE);
+    };
+    
+	for( auto SoldierRankIt = SOLDIER_JOBS.crbegin(); SoldierRankIt != SOLDIER_JOBS.crend(); ++SoldierRankIt  )
+    {
+        auto CurrentRank = GetSoldierRank( *SoldierRankIt );
+        
+		if( CurrentRank >= GetSoldierRank( JOB_GENERAL ))
 		{
 			while( it != troops.rend() && ( *it )->GetRank() == CurrentRank && troops.size() > 1 )
 			{
@@ -581,7 +593,7 @@ void nobMilitary::RegulateTrainTroops()
 				it = helpers::erase(troops, it);
 			}
 		}
-		else if( CurrentRank > 0 && CurrentRank < 4 )
+		else if( CurrentRank > GetSoldierRank( JOB_PRIVATE ) && CurrentRank < GetSoldierRank( JOB_GENERAL ) )
 		{
 			if( !RankCounts[CurrentRank] )
 			{
