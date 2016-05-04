@@ -126,12 +126,21 @@ namespace gc{
             bld->SetCoinsAllowed(enabled);
     }
 
+	void SetAutoTrainAllowed::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
+    {
+        nobMilitary* const bld = gwg.GetSpecObj<nobMilitary>(pt_);
+        if(bld && bld->GetPlayer() == playerid)
+            bld->SetAutoTrainAllowed(enabled);
+    }
+
     void SendSoldiersHome::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
     {
         nobMilitary* const bld = gwg.GetSpecObj<nobMilitary>(pt_);
         if(bld && bld->GetPlayer() == playerid)
             bld->SendSoldiersHome();
     }
+
+
 
     void OrderNewSoldiers::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
     {

@@ -910,7 +910,7 @@ void nobBaseWarehouse::TakeWare(Ware* ware)
     dependent_wares.push_back(ware);
 }
 
-void nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst)
+unsigned nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ignoresettingsendweakfirst, Job Wanted )
 {
     // Soldaten durchgehen und count rausschicken
 
@@ -937,6 +937,10 @@ void nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ignore
         for(unsigned i = 1; i <= SOLDIER_JOBS.size() && count; ++i)
         {
             const Job curRank = SOLDIER_JOBS[i - 1];
+
+			if( Wanted != JOB_NOTHING && curRank != Wanted )
+				continue;
+
             // Vertreter der Ränge ggf rausschicken
             while(inventory[curRank] && count)
             {
@@ -949,6 +953,7 @@ void nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ignore
         }
     }
 
+	return count;
 }
 
 nofAggressiveDefender* nobBaseWarehouse::SendDefender(nofAttacker* attacker)

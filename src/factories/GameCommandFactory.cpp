@@ -139,6 +139,12 @@ bool GameCommandFactory<T_Handler>::SetCoinsAllowed(const MapPoint pt, const boo
 }
 
 template<class T_Handler>
+bool GameCommandFactory<T_Handler>::SetAutoTrainAllowed(const MapPoint pt, const bool enabled)
+{
+    return AddGC_Virt( new gc::SetAutoTrainAllowed(pt, enabled) );
+}
+
+template<class T_Handler>
 bool GameCommandFactory<T_Handler>::SetProductionEnabled(const MapPoint pt, const bool enabled)
 {
     return AddGC_Virt( new gc::SetProductionEnabled(pt, enabled) );

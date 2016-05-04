@@ -63,6 +63,7 @@ namespace gc{
         case ORDERNEWSOLDIERS: return new OrderNewSoldiers(ser);
         case SENDSOLDIERSHOME: return new SendSoldiersHome(ser);
         case NOTIFYALLIESOFLOCATION: return new NotifyAlliesOfLocation(ser);
+        case SET_AUTOTRAIN_ALLOWED: return new SetAutoTrainAllowed(ser);
         default: break;
         }
 

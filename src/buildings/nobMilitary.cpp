@@ -164,6 +164,10 @@ void nobMilitary::Serialize_nobMilitary(SerializedGameData& sgd) const
     sgd.PushObjectContainer(ordered_coins, true);
     sgd.PushObjectContainer(troops, true);
     sgd.PushObjectContainer(far_away_capturers, true);
+
+    sgd.PushBool(mAutoTrain);
+    sgd.PushBool(mAutoTrainVirtual);
+
 }
 
 nobMilitary::nobMilitary(SerializedGameData& sgd, const unsigned obj_id) : nobBaseMilitary(sgd, obj_id),
@@ -192,6 +196,9 @@ nobMilitary::nobMilitary(SerializedGameData& sgd, const unsigned obj_id) : nobBa
     sgd.PopObjectContainer(ordered_coins, GOT_WARE);
     sgd.PopObjectContainer(troops, GOT_NOF_PASSIVESOLDIER);
     sgd.PopObjectContainer(far_away_capturers, GOT_NOF_ATTACKER);
+
+	mAutoTrain = sgd.PopBool();
+    mAutoTrainVirtual = sgd.PopBool();
 
     // ins Militärquadrat einfügen
     gwg->GetMilitarySquares().Add(this);
@@ -322,6 +329,9 @@ void nobMilitary::HandleEvent(const unsigned int id)
                 // Evtl neues Beförderungsevent anmelden
                 PrepareUpgrading();
 
+				if( mAutoTrain )
+					RegulateTroops();
+
                 // Ggf. neue Goldmünzen bestellen
                 SearchCoins();
             }
@@ -434,6 +444,13 @@ void nobMilitary::RegulateTroops()
 
     is_regulating_troops = true;
 
+	if( mAutoTrain )
+	{
+		RegulateTrainTroops();
+        is_regulating_troops = false;
+		return;
+	}
+
     // Zu viele oder zu wenig Truppen?
     int diff = CalcTroopsCount() - static_cast<int>(GetTotalSoldiers());
     if(diff < 0) //poc: this should only be >0 if we are being captured. capturing should be true until its the last soldier and this last one would count twice here and result in a returning soldier that shouldnt return.
@@ -517,6 +534,90 @@ void nobMilitary::RegulateTroops()
 		if(mightHaveRoad)
 			gwg->GetPlayer(player).OrderTroops(this, diff);
     }
+
+    is_regulating_troops = false;
+}
+
+void nobMilitary::RegulateTrainTroops()
+{
+    if(!gwg->GetPlayer(player).FindWarehouse(*this, FW::NoCondition(), true, false))
+    {
+        is_regulating_troops = false;
+        return;
+    }
+    
+    is_regulating_troops = true;
+
+	boost::array< unsigned char, 5 > RankCounts{ { 0, 0, 0, 0, 0 } };
+
+	for( auto& Soldier : troops )
+        ++RankCounts[ Soldier->GetRank() ];
+    
+    for( auto& Soldier : ordered_troops )
+        ++RankCounts[ Soldier->GetRank() ];
+
+    for( auto& Soldier : troops_on_mission )
+        ++RankCounts[ Soldier->GetRank() ];
+
+    for( auto& Soldier : far_away_capturers )
+        ++RankCounts[ Soldier->GetRank() ];
+
+    SortedTroops::reverse_iterator it = troops.rbegin();
+
+    auto GetSoldierRank = 
+    []( const Job& Job )
+    {
+        return unsigned char(SOLDIER_JOBS[ Job ] - JOB_PRIVATE);
+    };
+    
+	for( auto SoldierRankIt = SOLDIER_JOBS.crbegin(); SoldierRankIt != SOLDIER_JOBS.crend(); ++SoldierRankIt  )
+    {
+        auto CurrentRank = GetSoldierRank( *SoldierRankIt );
+        
+		if( CurrentRank >= GetSoldierRank( JOB_GENERAL ))
+		{
+			while( it != troops.rend() && ( *it )->GetRank() == CurrentRank && troops.size() > 1 )
+			{
+				(*it)->LeaveBuilding();
+				AddLeavingFigure(*it);
+				it = helpers::erase(troops, it);
+			}
+		}
+		else if( CurrentRank > GetSoldierRank( JOB_PRIVATE ) && CurrentRank < GetSoldierRank( JOB_GENERAL ) )
+		{
+			if( !RankCounts[CurrentRank] )
+			{
+				gwg->GetPlayer(player).OrderTroops(this, 
+					std::min( TROOPS_COUNT[nation][size] - static_cast<int>(GetTotalSoldiers()), 1 )
+					,true, SOLDIER_JOBS[ CurrentRank ]);
+			}
+			else
+			if( RankCounts[CurrentRank] > 1 )
+			{
+				unsigned SendOut = RankCounts[CurrentRank] - 1;
+				while( it != troops.rend() && ( *it )->GetRank() == CurrentRank && troops.size() > 1 )
+				{
+					if( SendOut > 0 )
+					{
+						(*it)->LeaveBuilding();
+						AddLeavingFigure(*it);
+						it = helpers::erase(troops, it);
+						--SendOut;
+					}
+					else
+						++it;
+				}
+			}
+		}
+		else
+		{
+			// PRIVATES
+			gwg->GetPlayer(player).OrderTroops(this, 
+					TROOPS_COUNT[nation][size] - static_cast<int>(GetTotalSoldiers()) 
+					,true, SOLDIER_JOBS[ CurrentRank ]);
+		}
+	
+	}
 
     is_regulating_troops = false;
 }
@@ -706,6 +807,9 @@ void nobMilitary::AddPassiveSoldier(nofPassiveSoldier* soldier)
         // Evtl. Soldaten befördern
         PrepareUpgrading();
     }
+
+	if( mAutoTrain )
+		RegulateTroops();
 
     // Goldmünzen suchen, evtl sinds ja neue Soldaten
     SearchCoins();
@@ -915,6 +1019,8 @@ void nobMilitary::Capture(const unsigned char new_owner)
     RTTR_Assert(IsCaptured());
 
     captured_not_built = true;
+	mAutoTrain = false;
+	mAutoTrainVirtual = false;
 
     // Goldmünzen in der Inventur vom alten Spieler abziehen und dem neuen hinzufügen
     gwg->GetPlayer(player).DecreaseInventoryWare(GD_COINS, coins);
@@ -1118,6 +1224,22 @@ void nobMilitary::SetCoinsAllowed(const bool enabled)
     }
 }
 
+void nobMilitary::SetAutoTrainAllowed(const bool enabled)
+{
+	//LOG.write("SetAutoTrainAllowed = %d, state = %d", enabled, mAutoTrain);
+	
+	if(mAutoTrain == !enabled)
+        return;
+
+    // Umstellen
+    mAutoTrain = !enabled;
+    // Wenn das von einem fremden Spieler umgestellt wurde (oder vom Replay), muss auch das visuelle umgestellt werden
+    if(GAMECLIENT.GetPlayerID() != player || GAMECLIENT.IsReplayModeOn())
+        mAutoTrainVirtual = mAutoTrain;
+
+	if( mAutoTrain )
+		RegulateTrainTroops();
+}
 
 unsigned nobMilitary::CalcCoinsPoints()
 {
@@ -1148,7 +1270,39 @@ unsigned nobMilitary::CalcCoinsPoints()
 bool nobMilitary::WantCoins()
 {
     // Wenn die Goldzufuhr gestoppt wurde oder Münzvorrat voll ist, will ich gar keine Goldmünzen
-    return (!coinsDisabled && coins + ordered_coins.size() != GOLD_COUNT[nation][size] && !new_built);
+	if( coinsDisabled )
+		return false;
+
+	if( coins + ordered_coins.size() >= GOLD_COUNT[nation][size] )
+		return false;
+
+	if( new_built )
+		return false;
+
+	if( !mAutoTrain )
+		return true;
+
+	unsigned PrivatesInBuilding = 0;	
+	unsigned PrivatesOrdered = 0;	
+	for(SortedTroops::iterator it = troops.begin(); it != troops.end(); ++it, ++PrivatesInBuilding )
+	{
+		if( (*it)->GetRank() )
+			break;
+	}
+
+	for(SortedTroops::iterator it = ordered_troops.begin(); it != ordered_troops.end(); ++it, ++PrivatesOrdered )
+	{
+		if( (*it)->GetRank() )
+			break;
+	}
+
+	/*
+	LOG.write( "WantCoins: CoinsInBuilding: %d, PrivatesInBuilding: %d, CoinsOrdered = %d, PrivatesOrdered = %d",
+		coins, PrivatesInBuilding, ordered_coins.size(), PrivatesOrdered
+		);
+		*/
+
+	return PrivatesInBuilding + PrivatesOrdered > coins + ordered_coins.size();
 }
 
 void nobMilitary::SearchCoins()

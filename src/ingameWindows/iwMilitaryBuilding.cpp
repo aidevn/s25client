@@ -63,6 +63,8 @@ iwMilitaryBuilding::iwMilitaryBuilding(GameWorldView& gwv, nobMilitary* const bu
 	//addon military control active? -> show button
 	if(gwv.GetViewer().GetGGS().isEnabled(AddonId::MILITARY_CONTROL))
 		AddImageButton( 10, 124, 147, 30, 32, TC_GREY, LOADER.GetImageN("io_new", 12), _("Send max rank soldiers to a warehouse"));
+
+	AddImageButton( 11, 156, 147, 19, 32, TC_GREY, LOADER.GetImageN("io", ((building->IsAutoTrainVirtual()) ? 227 : 226)), _("Auto train feature"));
 }
 
 void iwMilitaryBuilding::Msg_PaintAfter()
@@ -199,6 +201,24 @@ void iwMilitaryBuilding::Msg_ButtonClick(const unsigned int ctrl_id)
 		case 10: //send home button (addon)
 		{
 			GAMECLIENT.SendSoldiersHome(building->GetPos());
+		} break;
+
+		case 11:
+		{
+		    if(!GAMECLIENT.IsReplayModeOn() && !GAMECLIENT.IsPaused())
+            {
+                // NC senden
+                if(GAMECLIENT.SetAutoTrainAllowed(building->GetPos(), building->IsAutoTrainVirtual()))
+                {
+                    // visuell anzeigen
+                    building->ToggleAutoTrainVirtual();
+                    // anderes Bild auf dem Button
+                    if(building->IsAutoTrainVirtual())
+                        GetCtrl<ctrlImageButton>(11)->SetImage(LOADER.GetImageN("io", 227));
+                    else
+                        GetCtrl<ctrlImageButton>(11)->SetImage(LOADER.GetImageN("io", 226));
+                }
+            }
 		}
 		break;
     }
