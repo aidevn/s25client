@@ -203,9 +203,9 @@ void iwMilitaryBuilding::Msg_ButtonClick(const unsigned int ctrl_id)
 			GAMECLIENT.SendSoldiersHome(building->GetPos());
 		} break;
 
-		case 11:
-		{
-		    if(!GAMECLIENT.IsReplayModeOn() && !GAMECLIENT.IsPaused())
+        case 11:
+        {
+            if(!GAMECLIENT.IsReplayModeOn() && !GAMECLIENT.IsPaused())
             {
                 // NC senden
                 if(GAMECLIENT.SetAutoTrainAllowed(building->GetPos(), building->IsAutoTrainVirtual()))
@@ -219,8 +219,8 @@ void iwMilitaryBuilding::Msg_ButtonClick(const unsigned int ctrl_id)
                         GetCtrl<ctrlImageButton>(11)->SetImage(LOADER.GetImageN("io", 226));
                 }
             }
-		}
-		break;
+        }
+        break;
     }
 }
 

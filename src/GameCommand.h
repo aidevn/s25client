@@ -83,7 +83,7 @@ namespace gc
         SENDSOLDIERSHOME,
         ORDERNEWSOLDIERS,
         NOTIFYALLIESOFLOCATION,
-		SET_AUTOTRAIN_ALLOWED
+        SET_AUTOTRAIN_ALLOWED
     };
 
     class GameCommand

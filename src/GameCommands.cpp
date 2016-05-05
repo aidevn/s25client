@@ -126,7 +126,7 @@ namespace gc{
             bld->SetCoinsAllowed(enabled);
     }
 
-	void SetAutoTrainAllowed::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
+    void SetAutoTrainAllowed::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
     {
         nobMilitary* const bld = gwg.GetSpecObj<nobMilitary>(pt_);
         if(bld && bld->GetPlayer() == playerid)
@@ -139,9 +139,7 @@ namespace gc{
         if(bld && bld->GetPlayer() == playerid)
             bld->SendSoldiersHome();
     }
-
-
-
+    
     void OrderNewSoldiers::Execute(GameWorldGame& gwg, GameClientPlayer&  /*player*/, const unsigned char playerid)
     {
         nobMilitary* const bld = gwg.GetSpecObj<nobMilitary>(pt_);

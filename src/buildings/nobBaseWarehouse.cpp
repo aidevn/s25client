@@ -938,8 +938,8 @@ unsigned nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ig
         {
             const Job curRank = SOLDIER_JOBS[i - 1];
 
-			if( Wanted != JOB_NOTHING && curRank != Wanted )
-				continue;
+            if( Wanted != JOB_NOTHING && curRank != Wanted )
+                continue;
 
             // Vertreter der Ränge ggf rausschicken
             while(inventory[curRank] && count)
@@ -953,7 +953,7 @@ unsigned nobBaseWarehouse::OrderTroops(nobMilitary* goal, unsigned count,bool ig
         }
     }
 
-	return count;
+    return count;
 }
 
 nofAggressiveDefender* nobBaseWarehouse::SendDefender(nofAttacker* attacker)

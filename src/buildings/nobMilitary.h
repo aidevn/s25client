@@ -67,15 +67,8 @@ class nobMilitary : public nobBaseMilitary
         /// This building was captured by its current owner. This flag is set once and never to be changed again
         bool captured_not_built;
 
-		bool mAutoTrain = false;
-		bool mAutoTrainVirtual = false;
-		void RegulateTrainTroops();
-
-	public:
-        bool IsAutoTrain() const { return mAutoTrain; }
-		bool IsAutoTrainVirtual() const { return mAutoTrainVirtual; }
-		void SetAutoTrainAllowed(const bool enabled);
-		void ToggleAutoTrainVirtual(){ mAutoTrainVirtual = !mAutoTrainVirtual; } 
+        bool mAutoTrain = false;
+        bool mAutoTrainVirtual = false;
 
     public:
 
@@ -224,10 +217,10 @@ class nobMilitary : public nobBaseMilitary
         /// Sind noch Truppen drinne, die dieses Gebäude verteidigen können
         bool DefendersAvailable() const override { return (GetTroopsCount() > 0); }
 
-		/// send all soldiers of the highest rank home (if highest=lowest keep 1)
-		void SendSoldiersHome();
-		/// order new troops
-		void OrderNewSoldiers();
+        /// send all soldiers of the highest rank home (if highest=lowest keep 1)
+        void SendSoldiersHome();
+        /// order new troops
+        void OrderNewSoldiers();
 
         /// Darf das Militärgebäude abgerissen werden (Abriss-Verbot berücksichtigen)?
         bool IsDemolitionAllowed() const;
@@ -235,6 +228,12 @@ class nobMilitary : public nobBaseMilitary
         bool WasCapturedOnce() const {return(captured_not_built);}
 
         void UnlinkAggressor(nofAttacker* soldier) override;
+
+        bool IsAutoTrain() const { return mAutoTrain; }
+        bool IsAutoTrainVirtual() const { return mAutoTrainVirtual; }
+        void SetAutoTrainAllowed(const bool enabled);
+        void ToggleAutoTrainVirtual(){ mAutoTrainVirtual = !mAutoTrainVirtual; } 
+        void RegulateTrainTroops();
 };
 
 

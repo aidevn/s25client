@@ -488,7 +488,7 @@ namespace gc{
             void Execute(GameWorldGame& gwg, GameClientPlayer& player, const unsigned char playerid) override;
     };
 
-	class SetAutoTrainAllowed : public Coords
+    class SetAutoTrainAllowed : public Coords
     {
         GC_FRIEND_DECL;
         const bool enabled;
