@@ -567,7 +567,7 @@ void nobMilitary::RegulateTrainTroops()
     auto GetSoldierRank = 
     []( const Job& Job )
     {
-        return unsigned char(SOLDIER_JOBS[ Job ] - JOB_PRIVATE);
+        return unsigned char( Job - JOB_PRIVATE );
     };
     
 	for( auto SoldierRankIt = SOLDIER_JOBS.crbegin(); SoldierRankIt != SOLDIER_JOBS.crend(); ++SoldierRankIt  )
